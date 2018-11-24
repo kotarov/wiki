@@ -1,0 +1,27 @@
+#
+# You can put these lines into /etc/rc.local for example. 
+# 	Note: since Debian jessie make it executable and enabled the rc.local service via: 
+#     systemctl enable rc-local.service
+#
+
+# Clear iptablse
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+
+
+# Deny ALL traffic
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+# Allow only sertain port
+iptables -A INPUT -p tcp --dport ${PORT} -j ACCEPT
+
+# PORT forwording to inner circuit
+iptables -t nat -A PREROUTING -p tcp --dport ${SRC_PORT} -j DNAT --to-destination ${DEST_IP}:${DEST_PORT}
+iptables -t nat -A POSTROUTING -j MASQUERADE
+
